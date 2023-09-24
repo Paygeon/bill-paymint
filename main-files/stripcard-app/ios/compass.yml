@@ -1,0 +1,21 @@
+name: IOS App
+id: 'ari:cloud:compass:661ab2fa-64d7-4e7f-9845-51031aa8cf12:component/bc8e4401-1b7c-4d9c-b496-da836ca3f5c0/ce313359-c39b-4a07-8e99-c82537e9d831'
+description: null
+configVersion: 1
+typeId: APPLICATION
+ownerId: 'ari:cloud:teams::team/c326bd54-0449-4113-af95-54de0c72ead4'
+fields:
+  lifecycle: Pre-release
+  tier: 4
+links:
+  - name: IOS App
+    type: REPOSITORY
+    url: 'https://github.com/Paygeon/platform-package/tree/552dd70ec5e7091e0269b06a5827e261cd0bd5b9/main-files/stripcard-app/ios'
+relationships:
+  DEPENDS_ON:
+    - 'ari:cloud:compass:661ab2fa-64d7-4e7f-9845-51031aa8cf12:component/bc8e4401-1b7c-4d9c-b496-da836ca3f5c0/bbfdab94-311b-44a2-970c-5d8ad8a92943'
+labels: null
+customFields: null
+
+# Learn more about formatting compass.yml:
+# https://go.atlassian.com/compass-yml-format
