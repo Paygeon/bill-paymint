@@ -1,0 +1,21 @@
+name: Autoproof Snapshot
+on:
+  push:
+    branches:
+      - main
+jobs:
+  autoproof:
+    runs-on: ubuntu-latest
+    # NOTE: Instead of the "latest" tag, we recommend using the stable version tag of the autoproof/cli image 
+    # to have explicit control over updates (to avoid breaking backwards compatibility).
+    container: ghcr.io/autoproof/cli:stable
+    steps:
+      - name: Checkout source code
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Autoproof snapshot
+        env:
+          AUTOPROOF_APIKEY: ${{ secrets.AUTOPROOF_APIKEY }}
+        run: |
+          autoproofcli snapshot -m "GHA on ${{ github.repository }}@${{ github.sha }}: ${{ github.event.head_commit.message }}"
