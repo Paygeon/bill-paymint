@@ -1,1 +1,0 @@
-@include('admin.components.data-table.currency-table',compact("currencies"))

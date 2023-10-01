@@ -1,1 +1,0 @@
-@include('admin.components.data-table.user-table',compact("users"))
