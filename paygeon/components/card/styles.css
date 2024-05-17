@@ -1,0 +1,212 @@
+  /* Add bottom sheet styles */
+  .bottom-sheet {
+    display: none; /* Hidden by default */
+    position: fixed; /* Stay in place */
+    z-index: 1; /* Sit on top */
+    left: 0;
+    bottom: 0;
+    width: 100%; /* Full width */
+    max-height: 50%; /* Set max height as needed */
+    overflow: auto; /* Enable scroll if needed */
+    background-color: rgba(255, 255, 255, 0.9); /* White with opacity */
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
+    box-shadow: 0px -10px 20px rgba(0, 0, 0, 0.1); /* Add shadow */
+  }
+
+  /* Bottom sheet content */
+  .bottom-sheet-content {
+    padding: 20px;
+  }
+
+  /* Close button */
+  .close {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+  }
+
+  .close:hover,
+  .close:focus {
+    color: black;
+    text-decoration: none;
+  }
+.card {
+  max-width: 351px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-around;
+  gap: 0;
+  color: #d2d2d2;
+  font-weight: 400;
+  overflow: auto;
+}
+
+.card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding: 20px 20px 36px 17px;
+  border-radius: 5px;
+  background-color: #393838;
+  width: auto;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+  align-self: start;
+}
+
+.card-title {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.card-name {
+  font: 13px/123% Paygeon, sans-serif;
+  letter-spacing: 0.2px;
+  gap: 0;
+}
+
+.card-number {
+  display: flex;
+  gap: 8px;
+  margin-top: 4px;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  line-height: 130%;
+}
+
+.card-chip {
+  width: 25px;
+  aspect-ratio: 3.13;
+  object-fit: auto;
+  object-position: center;
+  margin: auto 0;
+  gap: 0;
+}
+
+.card-number-text {
+  font-family: Paygeon, sans-serif;
+  gap: 0;
+}
+
+.card-logo {
+  width: 93px;
+  aspect-ratio: 5.88;
+  object-fit: auto;
+  object-position: center;
+  align-self: start;
+  gap: 0;
+}
+
+.card-footer {
+  display: flex;
+  flex-direction: row;
+}
+
+.card-strip {
+  display: flex;
+  gap: 16px;
+  margin: auto 0;
+  border-radius: 6px;
+  background: linear-gradient(
+    117deg,
+    #caced2 4.29%,
+    #fff 49.22%,
+    #c7cbcf 95.11%
+  );
+  box-shadow: -0.5px -0.5px 0 0 rgba(41, 38, 39, 0.44) inset,
+    0.5px 0.5px 0 0 #292627 inset;
+}
+
+.card-strip-start {
+  width: 12px;
+  aspect-ratio: 0.4;
+  object-fit: auto;
+  object-position: center;
+  gap: 0;
+}
+
+.card-strip-end {
+  width: 12px;
+  aspect-ratio: 0.6;
+  object-fit: auto;
+  object-position: center;
+  align-self: start;
+  margin-top: 10px;
+  gap: 0;
+}
+
+
+.card-status {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-left: 110px; /* Adjust this line to move the button to the right */
+  padding-bottom: 13px;
+  max-width: 177px;
+  width: 158.2px;
+  height: 65px;
+  background-color: #fff;
+  font-weight: 400;
+  justify-content: center; /* Center vertically */
+  align-items: center; /* Center horizontally */
+}
+
+.card-status-action {
+  display: flex;
+  gap: 12px;
+  padding: 0px 20px;
+  font-size: 13px;
+  color: #0d0d0d;
+  letter-spacing: 0.2px;
+  line-height: 123%;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.card-status-text {
+  font-family: Paygeon, sans-serif;
+  text-align: center;
+  margin-top: 20px;
+}
+
+.card-status-icon {
+  width: 19px;
+  aspect-ratio: 2.38;
+  margin-top: 20px;
+}
+
+.card-status-container {
+  position: relative;
+}
+
+.card-status-label {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 78.2px;
+  padding: 4px 39px;
+  background-color: #06c270;
+  color: #d2d2d2;
+  text-align: center;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font: 10px/130% Paygeon, sans-serif;
+  z-index: 1; /* Make sure it's above the button */
+  margin-left: 110px;
+}
+
+.card-status.pressed {
+  background-color: transparent;
+  border: 1px solid #ccc; /* Change to desired border color */
+  box-shadow: inset 0 2px 3px rgba(0, 0, 0, 0.2); /* Add depth effect */
+}
