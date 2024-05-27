@@ -34,3 +34,14 @@ You can check out [the Next.js GitHub repository](https://github.com/vercel/next
 The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
 
 Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+
+## Using the tool
+
+Paygeon offers users a platform to pay any invoices using multiple crypto options. Users also have the flexibility to upload invoices using files from their device or capture a new photo. The steps are described briefly below:
+
+- Initially, the user needs to upload the invoice using an existing file on their device or by capturing a new photo.
+- This automatically triggers the text recognition function, which looks for payment details. If found, further steps are provided to the user. Otherwise, an error message is displayed.
+- From the recognized text, merchant details and the amount are extracted, along with the final amount to be paid, including charges.
+- The user can then choose from five cryptocurrencies: BTC, ETH, LTC, DOGE, and TRX. The amount to be paid in the corresponding currency is automatically updated, along with the payment address.
+- The user must pay to the provided address using the wallet app of their choice. The copy button provided allows the user to copy the address for payment. Hovering over the address for a couple of seconds enables a tooltip, aiding in verifying the address.
+- Once done, the user can confirm the payment using the button provided, which triggers an acknowledgment email to both the user and the internal team.
