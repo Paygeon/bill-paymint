@@ -31,7 +31,7 @@ const CameraLottie: React.FC = () => {
   }, []);
 
   return (
-    <div className="flex justify-center items-center h-screen w-screen overflow-hidden bg-transparent">
+    <div className="flex justify-center items-center w-full h-full overflow-hidden bg-transparent">
       <div
         id="animationWindow"
         ref={animationContainer}

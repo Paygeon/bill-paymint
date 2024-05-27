@@ -17,15 +17,53 @@ function verifySignature(body: string, signature: string, publicKey: string): bo
 }
 
 async function generateCryptoAddress(coin: string, amount: number, callbackUrl: string): Promise<any> {
+  var address: string;
+
+  switch (coin) {
+    case 'btc':
+      address = 'bc1qmhg6z5dgnpsswwht0x53g7yucjqfahyc60fctn';
+      break;
+    case 'ltc':
+      address = 'ltc1q4efmghs2zupatst89tstmjvahn89hnvkuan8qa';
+      break;
+    case 'eth':
+      address = '0xa44E9D6E5C9b638D9CEE82fa02c3A21a985772a8';
+      break;
+    case 'doge':
+      address = 'D59DKnQrMYswmfFik1dbqqVBksF9j4yZ1j';
+      break;
+    case 'trx':
+      address = 'TK2vRkUtTKhZroAny7uqLkzTwBoXUbj4Um';
+      break;
+    default:
+      throw new Error('Unsupported crypto currency');
+  }
   try {
-    const response = await fetch('GET https://btc.paymint.to/1BvBMSEYstWetqTFn5Au4m4GFg7xJaNVN2?callback=https://example.com/payment/12345', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ coin, amount, callbackUrl }),
-    });
-    return response.json();
+    const query = new URLSearchParams({
+      callback: callbackUrl,
+      address: `1.0@${address}`,
+      pending: '0',
+      confirmations: '1',
+      email: 'paygeoncard@gmail.com',
+      post: '0',
+      json: '1',
+      priority: 'default',
+      multi_token: '0',
+      multi_chain: '0',
+      convert: '1'
+    }).toString();
+    
+    const ticker = coin;
+    const resp = await fetch(
+      `https://api.cryptapi.io/${ticker}/create/?${query}`,
+      {method: 'GET'}
+    );
+    const data = await resp.text();
+    const parsedData = JSON.parse(data);
+    console.log(parsedData)
+    if (parsedData.status == "success") {
+      return parsedData.address_in;
+    }
   } catch (error) {
     throw new Error('Error generating address');
   }
