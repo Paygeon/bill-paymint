@@ -247,7 +247,7 @@ export default function InvoiceUploader() {
 
   // Extracting invoice amount from OCR result
   const extractDataFromOcr = (text: string): { amountDue: number } | null => {
-    const amountDueRegex = /(?:Amount|Amount Due|Balance|Balance Due|Total|Total Due|Subtotal)\s*:?\s*\$?([\d,]+(?:\.\d{2})?)/i;
+    const amountDueRegex = /(?:Amount|Amount Due|Balance|Balance Due|Total|Total Due)\s*:?\s*\$?([\d,]+(?:\.\d{2})?)/i;
     const amountDueMatch = text.match(amountDueRegex);
     if (!amountDueMatch) {
       console.error('Failed to extract amount due from OCR');
