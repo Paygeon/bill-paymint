@@ -1,12 +1,17 @@
 import React, { useState, useRef } from 'react';
+import dynamic from 'next/dynamic';
 import Tesseract from 'tesseract.js';
 import { generateCryptoAddress } from '../../app/api/payment';
-import CameraLottie from '../animation/CameraLottie';
 import './styles.css';
 import CopyButton from './copyButton';
 import emailjs from "@emailjs/browser";
 
+const CameraLottie = dynamic(() => import('../animation/CameraLottie'), {
+  ssr: false,
+});
+
 export default function InvoiceUploader() {
+  // Defining state variables
   const [file, setFile] = useState<File | null>(null);
   const [ocrResult, setOcrResult] = useState<string | null>(null);
   const [invoiceData, setInvoiceData] = useState<{ amountDue: number } | null>(null);
@@ -21,14 +26,7 @@ export default function InvoiceUploader() {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.files && event.target.files[0]) {
-      setFile(event.target.files[0]);
-      resetStateVariables();
-      handleUpload(event.target.files[0]);
-    }
-  };
-
+  // Handling photo capture of the invoice using camera
   const handleTakePhoto = () => {
     const screenWidth = window.screen.width;
     const screenHeight = window.screen.height;
@@ -39,6 +37,7 @@ export default function InvoiceUploader() {
       `width=${screenWidth},height=${screenHeight},left=0,top=0`
     );
 
+    // Defining and styling the video stream and the button to capture photos
     if (newWindow) {
       newWindow.document.write(`
       <html>
@@ -90,10 +89,12 @@ export default function InvoiceUploader() {
     `);
       newWindow.document.close();
 
+      // Handling message from new window
       const handleMessage = (event: MessageEvent) => {
         if (event.origin !== window.location.origin) return;
         if (event.data.type === 'CAPTURED_PHOTO') {
           const photo = event.data.photo;
+          // Setting captured photo as the invoice file to be further processed
           setFile(photo);
           resetStateVariables();
           handleUpload(photo);
@@ -104,6 +105,7 @@ export default function InvoiceUploader() {
 
       window.addEventListener('message', handleMessage);
 
+      // Script for the new window to capture photo using the camera
       const cameraScript = `
       (function() {
         const video = document.getElementById('video');
@@ -135,6 +137,23 @@ export default function InvoiceUploader() {
     }
   };
 
+  // Handling choosing a file from file input
+  const handleChooseFile = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  // Handling a change in file uploaded
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.files && event.target.files[0]) {
+      setFile(event.target.files[0]);
+      resetStateVariables();
+      handleUpload(event.target.files[0]);
+    }
+  };
+
+  // Resetting all the state variables to default
   const resetStateVariables = () => {
     setOcrResult(null);
     setInvoiceData(null);
@@ -143,12 +162,42 @@ export default function InvoiceUploader() {
     setResponse(null);
   };
 
-  const handleChooseFile = () => {
-    if (fileInputRef.current) {
-      fileInputRef.current.click();
+  // Processing the photo for further usage
+  const handleUpload = async (uploadedFile?: File) => {
+    const fileToProcess = uploadedFile || file;
+    if (!fileToProcess) return;
+
+    try {
+      // Recognizing text from the image using Tesseract OCR
+      const result = await Tesseract.recognize(fileToProcess, 'eng', {
+        logger: (m) => console.log(m),
+      });
+
+      setOcrResult(result.data.text);
+      extractInvoiceInfo(result.data.text);
+
+      const extractedData = extractDataFromOcr(result.data.text);
+      if (!extractedData) {
+        console.error('Failed to extract data from OCR');
+        return;
+      }
+
+      setInvoiceData(extractedData);
+
+      const amountWithFees = calculatePaymentAmount(extractedData.amountDue);
+      setPaymentAmount(amountWithFees.toFixed(2));
+
+      const callbackUrl = `https://paygeon.com/api/payment`;
+      const addressResponse = await generateCryptoAddress(coin, amountWithFees, callbackUrl);
+      setResponse(addressResponse);
+      console.log(addressResponse);
+      handlePayment(extractedData.amountDue, amountWithFees - extractedData.amountDue, coin);
+    } catch (error) {
+      console.error('Error processing the image with Tesseract:', error);
     }
   };
 
+  // Extracting customer and merchant information from OCR result
   const extractInvoiceInfo = (text: string) => {
     console.log(text);
 
@@ -196,80 +245,7 @@ export default function InvoiceUploader() {
     setMerchantInfo(merchantInfo);
   };
 
-
-  const handleUpload = async (uploadedFile?: File) => {
-    const fileToProcess = uploadedFile || file;
-    if (!fileToProcess) return;
-
-    try {
-      const result = await Tesseract.recognize(fileToProcess, 'eng', {
-        logger: (m) => console.log(m),
-      });
-
-      setOcrResult(result.data.text);
-      extractInvoiceInfo(result.data.text);
-
-      const extractedData = extractDataFromOcr(result.data.text);
-      if (!extractedData) {
-        console.error('Failed to extract data from OCR');
-        return;
-      }
-
-      setInvoiceData(extractedData);
-
-      const amountWithFees = calculatePaymentAmount(extractedData.amountDue);
-      setPaymentAmount(amountWithFees.toFixed(2));
-
-      const callbackUrl = `https://paygeon.com/api/payment`;
-      const addressResponse = await generateCryptoAddress(coin, amountWithFees, callbackUrl);
-      setResponse(addressResponse);
-      console.log(addressResponse);
-      handlePayment(extractedData.amountDue, amountWithFees - extractedData.amountDue, coin);
-    } catch (error) {
-      console.error('Error processing the image with Tesseract:', error);
-    }
-  };
-
-  const handleCryptoChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const callbackUrl = `https://paygeon.com/api/payment`;
-    const coinSymbol = event.target.value;
-    setDropdownCoin(coinSymbol);
-    console.log("Symbol :: ", coinSymbol)
-    if (paymentAmount && invoiceData) {
-      try {
-        const addressResponse = await generateCryptoAddress(coinSymbol, paymentAmount, callbackUrl);
-        setResponse(addressResponse);
-        console.log(addressResponse);
-      } catch (error) {
-        console.error('Error generating crypto address:', error);
-      }
-      await handlePayment(invoiceData.amountDue, paymentAmount - invoiceData.amountDue, coinSymbol);
-    }
-  };
-
-  const handlePayment = async (invoiceAmount: number, fees: number, cryptoSymbol: string) => {
-    // Implement payment handling logic here
-    const query = new URLSearchParams({
-      value: `${invoiceAmount + fees}`,
-      from: 'usd'
-    }).toString();
-    console.log(cryptoSymbol)
-    const ticker = cryptoSymbol;
-    const resp = await fetch(
-      `https://api.cryptapi.io/${ticker}/convert/?${query}`,
-      { method: 'GET' }
-    );
-
-    const data = await resp.text();
-    const parsedData = JSON.parse(data);
-    console.log(data)
-    if (parsedData.status == 'success') {
-      console.log(parsedData.value_coin)
-      setCoinPaymentAmount(parsedData.value_coin)
-      setCoin(cryptoSymbol);
-    }
-  };
-
+  // Extracting invoice amount from OCR result
   const extractDataFromOcr = (text: string): { amountDue: number } | null => {
     const amountDueRegex = /(?:Amount|Amount Due|Balance|Balance Due|Total|Total Due|Subtotal)\s*:?\s*\$?([\d,]+(?:\.\d{2})?)/i;
     const amountDueMatch = text.match(amountDueRegex);
@@ -287,6 +263,7 @@ export default function InvoiceUploader() {
     return { amountDue };
   };
 
+  // Calculating the total amount to be paid, including fees and charges
   const calculatePaymentAmount = (amountDue: number): number => {
     // Calculate the additional fee based on 1.35% of the amountDue
     const additionalFeePercentage = 1.35 / 100;
@@ -302,6 +279,44 @@ export default function InvoiceUploader() {
     return finalAmount;
   };
 
+  // Converting the total amount into selected crypto
+  const handlePayment = async (invoiceAmount: number, fees: number, cryptoSymbol: string) => {
+    // Implement payment handling logic here
+    const query = new URLSearchParams({
+      value: `${invoiceAmount + fees}`,
+      from: 'usd'
+    }).toString();
+    const ticker = cryptoSymbol;
+    const resp = await fetch(
+      `https://api.cryptapi.io/${ticker}/convert/?${query}`,
+      { method: 'GET' }
+    );
+
+    const data = await resp.text();
+    const parsedData = JSON.parse(data);
+    if (parsedData.status == 'success') {
+      setCoinPaymentAmount(parsedData.value_coin)
+      setCoin(cryptoSymbol);
+    }
+  };
+
+  // Handling a change in selected crypto
+  const handleCryptoChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
+    const callbackUrl = `https://paygeon.com/api/payment`;
+    const coinSymbol = event.target.value;
+    setDropdownCoin(coinSymbol);
+    if (paymentAmount && invoiceData) {
+      try {
+        const addressResponse = await generateCryptoAddress(coinSymbol, paymentAmount, callbackUrl);
+        setResponse(addressResponse);
+      } catch (error) {
+        console.error('Error generating crypto address:', error);
+      }
+      await handlePayment(invoiceData.amountDue, paymentAmount - invoiceData.amountDue, coinSymbol);
+    }
+  };
+
+  // Handling the payment acknowledgement from the customer
   const handleConfirmPayment = () => {
     try {
       setConfirmPayment(1);
@@ -326,6 +341,7 @@ export default function InvoiceUploader() {
         toEmail: customerInfo?.email
       };
 
+      // Triggering an email using EmailJS with the provided template and data
       const sendEmail = (formData: any, template: string) => {
         const form = document.createElement("form");
 
@@ -345,6 +361,7 @@ export default function InvoiceUploader() {
       };
 
       setTimeout(() => {
+        // Seding a confirmation email both to the internal team and the customer
         sendEmail(internalTeamData, "template_ui2a7ls");
         sendEmail(customerData, "template_hocme3k");
         setConfirmPayment(2);
@@ -365,12 +382,12 @@ export default function InvoiceUploader() {
         <CameraLottie />
       </div>
       <div>
-        <button onClick={handleTakePhoto} className="custom-button take-photo-button">
+        <button onClick={handleTakePhoto} className="custom-button custom-white-button">
           Take a Photo
         </button>
         <br></br>
         <input type="file" accept="image/*" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-        <button onClick={handleChooseFile} className="custom-button choose-file-button">
+        <button onClick={handleChooseFile} className="custom-button custom-white-button">
           Choose File
         </button>
         {file ? (
