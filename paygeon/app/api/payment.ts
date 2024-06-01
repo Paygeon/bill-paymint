@@ -17,23 +17,28 @@ function verifySignature(body: string, signature: string, publicKey: string): bo
 }
 
 async function generateCryptoAddress(coin: string, amount: number, callbackUrl: string): Promise<any> {
-  var address: string;
+  var address: string, ticker: string;
 
   switch (coin) {
     case 'btc':
       address = 'bc1qmhg6z5dgnpsswwht0x53g7yucjqfahyc60fctn';
+      ticker = 'btc';
       break;
     case 'ltc':
       address = 'ltc1q4efmghs2zupatst89tstmjvahn89hnvkuan8qa';
+      ticker = 'ltc';
       break;
     case 'eth':
       address = '0xa44E9D6E5C9b638D9CEE82fa02c3A21a985772a8';
+      ticker = 'eth';
       break;
     case 'doge':
       address = 'D59DKnQrMYswmfFik1dbqqVBksF9j4yZ1j';
+      ticker = 'doge';
       break;
     case 'trx':
       address = 'TK2vRkUtTKhZroAny7uqLkzTwBoXUbj4Um';
+      ticker = 'trx';
       break;
     default:
       throw new Error('Unsupported crypto currency');
@@ -53,7 +58,6 @@ async function generateCryptoAddress(coin: string, amount: number, callbackUrl: 
       convert: '1'
     }).toString();
     
-    const ticker = coin;
     const resp = await fetch(
       `https://api.cryptapi.io/${ticker}/create/?${query}`,
       {method: 'GET'}
