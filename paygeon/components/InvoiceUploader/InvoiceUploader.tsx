@@ -8,11 +8,6 @@ import './styles.css';
 import CopyButton from './copyButton';
 import emailjs from "@emailjs/browser";
 import NeoPopTiltedButton from '../NeoPOPTiltedButton/NeoPOPTiltedButton';
-import dynamic from 'next/dynamic';
-
-const CameraLottie = dynamic(() => import('../animation/CameraLottie'), {
-  ssr: false,
-});
 
 const CameraLottie = dynamic(() => import('../animation/CameraLottie'), {
   ssr: false,
