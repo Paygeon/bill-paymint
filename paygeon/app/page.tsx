@@ -5,6 +5,7 @@ import InvoiceUploader from '../components/InvoiceUploader/InvoiceUploader';
 import dynamic from 'next/dynamic'; // Import dynamic from Next.js
 import { BottomSheetProvider, useBottomSheet } from '../context/BottomSheetContext'; // Import BottomSheetProvider and useBottomSheet
 import BottomSheet from '../components/BottomSheet'; // Import or define BottomSheet component
+import BottomMenu from '@/components/BottomMenu';
 
 
 // Dynamically import MoonPayProvider and MoonPayBuyWidget
@@ -23,6 +24,11 @@ const App: React.FC = () => {
   return (
     <BottomSheetProvider> {/* Ensure BottomSheetProvider wraps around components using useBottomSheet */}
       <AppContent />
+      <br />
+      <br />
+      <br />
+      <br />
+      <BottomMenu />
     </BottomSheetProvider>
   );
 };
