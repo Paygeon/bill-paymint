@@ -16,33 +16,29 @@ function verifySignature(body: string, signature: string, publicKey: string): bo
   return verifier.verify(publicKey, signature, 'base64');
 }
 
-async function generateCryptoAddress(coin: string, amount: number, callbackUrl: string): Promise<any> {
-  var address: string, ticker: string;
+type CryptoDetails = {
+  address: string;
+  ticker: string;
+};
 
-  switch (coin) {
-    case 'btc':
-      address = 'bc1qmhg6z5dgnpsswwht0x53g7yucjqfahyc60fctn';
-      ticker = 'btc';
-      break;
-    case 'ltc':
-      address = 'ltc1q4efmghs2zupatst89tstmjvahn89hnvkuan8qa';
-      ticker = 'ltc';
-      break;
-    case 'eth':
-      address = '0xa44E9D6E5C9b638D9CEE82fa02c3A21a985772a8';
-      ticker = 'eth';
-      break;
-    case 'doge':
-      address = 'D59DKnQrMYswmfFik1dbqqVBksF9j4yZ1j';
-      ticker = 'doge';
-      break;
-    case 'trx':
-      address = 'TK2vRkUtTKhZroAny7uqLkzTwBoXUbj4Um';
-      ticker = 'trx';
-      break;
-    default:
-      throw new Error('Unsupported crypto currency');
+const cryptoDetails: Record<string, CryptoDetails> = {
+  btc: { address: 'bc1qmhg6z5dgnpsswwht0x53g7yucjqfahyc60fctn', ticker: 'btc' },
+  ltc: { address: 'ltc1q4efmghs2zupatst89tstmjvahn89hnvkuan8qa', ticker: 'ltc' },
+  eth: { address: '0xa44E9D6E5C9b638D9CEE82fa02c3A21a985772a8', ticker: 'eth' },
+  doge: { address: 'D59DKnQrMYswmfFik1dbqqVBksF9j4yZ1j', ticker: 'doge' },
+  trx: { address: 'TK2vRkUtTKhZroAny7uqLkzTwBoXUbj4Um', ticker: 'trx' }
+};
+
+function getCryptoDetails(coin: string): CryptoDetails {
+  const details = cryptoDetails[coin];
+  if (!details) {
+    throw new Error('Unsupported crypto currency');
   }
+  return details;
+}
+
+async function generateCryptoAddress(coin: string, amount: number, callbackUrl: string): Promise<any> {
+  const { address, ticker } = getCryptoDetails(coin);
   try {
     const query = new URLSearchParams({
       callback: callbackUrl,
@@ -50,7 +46,7 @@ async function generateCryptoAddress(coin: string, amount: number, callbackUrl: 
       pending: '0',
       confirmations: '1',
       email: 'paygeoncard@gmail.com',
-      post: '0',
+      post: '1',
       json: '1',
       priority: 'default',
       multi_token: '0',
@@ -64,7 +60,6 @@ async function generateCryptoAddress(coin: string, amount: number, callbackUrl: 
     );
     const data = await resp.text();
     const parsedData = JSON.parse(data);
-    console.log(parsedData)
     if (parsedData.status == "success") {
       return parsedData.address_in;
     }
@@ -74,6 +69,29 @@ async function generateCryptoAddress(coin: string, amount: number, callbackUrl: 
 }
 
 export { generateCryptoAddress };
+
+async function confirmPayment(callbackUrl: string, coin: string) {
+  const { ticker } = getCryptoDetails(coin);
+  try {
+    const query = new URLSearchParams({
+      callback: callbackUrl
+    }).toString();
+    const resp = await fetch(
+      `https://api.cryptapi.io/${ticker}/logs/?${query}`,
+      {method: 'GET'}
+    );
+    const data = await resp.text();
+    const parsedData = JSON.parse(data);
+    console.log(parsedData)
+    if (parsedData.status == "success") {
+      return parsedData.callbacks[parsedData.callbacks.length - 1];
+    }
+  } catch (error) {
+    throw new Error('Error generating address');
+  }
+}
+
+export { confirmPayment };
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const {
