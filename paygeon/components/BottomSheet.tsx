@@ -1,5 +1,5 @@
 // components/BottomSheet.tsx
-import { ReactNode } from 'react';
+import { ReactNode, useEffect } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 
@@ -34,12 +34,13 @@ const BottomSheet: React.FC<BottomSheetProps> = ({ isVisible, content, onClose }
     return memo;
   });
 
-  // Handle visibility change
-  if (isVisible) {
-    openSheet();
-  } else {
-    closeSheet();
-  }
+  useEffect(() => {
+    if (isVisible) {
+      openSheet();
+    } else {
+      closeSheet();
+    }
+  }, [isVisible]);
 
   return (
     <>
@@ -52,7 +53,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({ isVisible, content, onClose }
         style={{ transform: y.to(y => `translateY(${y}%)`) }}
         className="fixed inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-lg p-6 z-50"
       >
-        <div className="relative w-full max-w-md mx-auto">
+        <div className="relative w-full max-w-md mx-none">
           {content}
         </div>
       </animated.div>

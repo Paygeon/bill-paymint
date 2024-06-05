@@ -29,7 +29,7 @@ const BottomMenu: React.FC = () => {
   };
 
   return (
-    <nav className="flex gap-0 justify-center mx-auto text-xs font-medium tracking-wide leading-4 whitespace-nowrap border-solid bg-stone-950 border-[0.5px] border-black border-opacity-0 fixed bottom-0 w-full">
+    <nav className="flex gap-0 justify-center mx-none text-xs font-medium tracking-wide leading-4 whitespace-nowrap border-solid bg-stone-950 border-[0.5px] border-black border-opacity-0 fixed bottom-0 w-full">
       {navItems.map((item, index) => (
         <NavigationItem key={index} {...item} onClick={() => handleClick(item.label)} />
       ))}

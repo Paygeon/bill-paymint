@@ -7,16 +7,15 @@ import { BottomSheetProvider, useBottomSheet } from '../context/BottomSheetConte
 import BottomSheet from '../components/BottomSheet'; // Import or define BottomSheet component
 import BottomMenu from '@/components/BottomMenu';
 
-
 // Dynamically import MoonPayProvider and MoonPayBuyWidget
 const MoonPayProvider = dynamic(
   () => import('@moonpay/moonpay-react').then((mod) => mod.MoonPayProvider),
-  { ssr: false },
+  { ssr: false }
 );
 
 const MoonPayBuyWidget = dynamic(
   () => import('@moonpay/moonpay-react').then((mod) => mod.MoonPayBuyWidget),
-  { ssr: false },
+  { ssr: false }
 );
 
 // Define App component
@@ -51,24 +50,29 @@ const AppContent: React.FC = () => {
     setBottomSheetContent(null);
   };
 
+  const toggleWidget = () => {
+    if (isVisible) {
+      handleCloseBottomSheet();
+    } else {
+      handleOpenBottomSheet(
+        <MoonPayBuyWidget
+          variant="embedded"
+          baseCurrencyCode="usd"
+          baseCurrencyAmount="100"
+          defaultCurrencyCode="eth"
+          visible
+        />
+      );
+    }
+  };
+
   return (
     <div className="flex flex-col items-center justify-center min-h-screen py-2">
       <h1 className="text-3xl font-bold mb-4">Upload Invoice</h1>
-      <MoonPayProvider
-        apiKey="pk_test_NWjOGREvFvtTnJGEguH56nuNXcUK8J"
-        debug
-      >
+      <MoonPayProvider apiKey="pk_test_NWjOGREvFvtTnJGEguH56nuNXcUK8J" debug>
         <InvoiceUploader />
         <div className="card-status-container">
-          <button onClick={() => handleOpenBottomSheet(
-            <MoonPayBuyWidget
-              variant="embedded"
-              baseCurrencyCode="usd"
-              baseCurrencyAmount="100"
-              defaultCurrencyCode="eth"
-              visible
-            />
-          )}>
+          <button onClick={toggleWidget}>
             <span className="card-status-text">Pay more</span>
             <img
               src="https://cdn.builder.io/api/v1/image/assets/TEMP/ecc0b05a8f663d59e79f625e990bef18268be3db9cf01bde057680b4fec7e0ee?apiKey=aa19eef6d1f1473ba394866de3aadd86&"
@@ -85,3 +89,4 @@ const AppContent: React.FC = () => {
 };
 
 export default App;
+
