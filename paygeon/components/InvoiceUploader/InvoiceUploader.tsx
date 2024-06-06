@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import dynamic from 'next/dynamic';
 import Tesseract from 'tesseract.js';
-import { generateCryptoAddress } from '../../app/api/payment';
+import { generateCryptoAddress, confirmPayment } from '../../app/api/payment';
 
 import './styles.css';
 
@@ -25,7 +25,8 @@ export default function InvoiceUploader() {
   const [response, setResponse] = useState<any>(null);
   const [customerInfo, setCustomerInfo] = useState<{ name: string, email: string, address: string } | null>(null);
   const [merchantInfo, setMerchantInfo] = useState<{ name: string, email: string, address: string, account: string } | null>(null);
-  const [confirmPayment, setConfirmPayment] = useState<number>(0);
+  const [paymentStatus, setPaymentStatus] = useState<number>(0);
+  const [callbackUrl, setCallbackUrl] = useState<any>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -190,11 +191,17 @@ export default function InvoiceUploader() {
       const amountWithFees = calculatePaymentAmount(extractedData.amountDue);
       setPaymentAmount(amountWithFees.toFixed(2));
 
-      const callbackUrl = `https://paygeon.com/api/payment`;
+      const coinAmount = await handlePayment(extractedData.amountDue, amountWithFees - extractedData.amountDue, coin);
+      const query = new URLSearchParams({
+        amount: `${coinAmount}`
+      }).toString();
+
+      const callbackUrl = `https://paygeon.com/api/payment?${query}`;
+      setCallbackUrl(callbackUrl);
+
       const addressResponse = await generateCryptoAddress(coin, amountWithFees, callbackUrl);
       setResponse(addressResponse);
       console.log(addressResponse);
-      handlePayment(extractedData.amountDue, amountWithFees - extractedData.amountDue, coin);
     } catch (error) {
       console.error('Error processing the image with Tesseract:', error);
     }
@@ -300,29 +307,36 @@ export default function InvoiceUploader() {
     if (parsedData.status == 'success') {
       setCoinPaymentAmount(parsedData.value_coin)
       setCoin(cryptoSymbol);
+      return parsedData.value_coin;
     }
+    return null;
   };
 
   // Handling a change in selected crypto
   const handleCryptoChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
-    const callbackUrl = `https://paygeon.com/api/payment`;
     const coinSymbol = event.target.value;
     setDropdownCoin(coinSymbol);
     if (paymentAmount && invoiceData) {
+      const coinAmount = await handlePayment(invoiceData.amountDue, paymentAmount - invoiceData.amountDue, coinSymbol);
+      const query = new URLSearchParams({
+        amount: `${coinAmount}`
+      }).toString();
+      const callbackUrl = `https://paygeon.com/api/payment?${query}`;
+      setCallbackUrl(callbackUrl);
       try {
         const addressResponse = await generateCryptoAddress(coinSymbol, paymentAmount, callbackUrl);
         setResponse(addressResponse);
       } catch (error) {
         console.error('Error generating crypto address:', error);
       }
-      await handlePayment(invoiceData.amountDue, paymentAmount - invoiceData.amountDue, coinSymbol);
     }
   };
 
   // Handling the payment acknowledgement from the customer
-  const handleConfirmPayment = () => {
+  const handleConfirmPayment = async () => {
+    const status = await confirmPayment(callbackUrl, coin);
     try {
-      setConfirmPayment(1);
+      setPaymentStatus(1);
 
       const internalTeamData = {
         coinAmount: coinPaymentAmount,
@@ -365,17 +379,21 @@ export default function InvoiceUploader() {
 
       setTimeout(() => {
         // Seding a confirmation email both to the internal team and the customer
-        sendEmail(internalTeamData, "template_ui2a7ls");
-        sendEmail(customerData, "template_hocme3k");
-        setConfirmPayment(2);
+        if (status.value_coin == coinPaymentAmount){
+          sendEmail(internalTeamData, "template_ui2a7ls");
+          sendEmail(customerData, "template_hocme3k");
+          setPaymentStatus(2);
+        } else {
+          setPaymentStatus(3);
+        }
       }, 2000);
 
       setTimeout(() => {
-        setConfirmPayment(0);
+        setPaymentStatus(0);
       }, 4000);
     } catch (err) {
       console.log(err);
-      setConfirmPayment(0);
+      setPaymentStatus(0);
     }
   };
 
@@ -464,12 +482,11 @@ export default function InvoiceUploader() {
         <hr className="separating-line" />
       )}
       {coinPaymentAmount !== null && (
-        <NeoPopTiltedButton onClick={handleConfirmPayment} disabled={confirmPayment != 0} className="w-23">
-          {confirmPayment == 0 ? "Confirm Payment" : confirmPayment == 1 ?
+        <NeoPopTiltedButton onClick={handleConfirmPayment} disabled={paymentStatus != 0} className="w-23">
+          {paymentStatus == 0 ? "Confirm Payment" : paymentStatus == 1 ?
             <svg>
-            </svg> : "Done"}
+            </svg> : paymentStatus == 2 ? "Success" : "Failed. Please Try Again."}
         </NeoPopTiltedButton>
-
       )}
     </div>
   );

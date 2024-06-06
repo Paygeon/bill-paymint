@@ -77,7 +77,7 @@ The project uses [`CryptAPI`](https://cryptapi.io/) to fetch market prices and g
 - Update the addresses for different cryptocurrencies and the email to receive payment confirmations in `paygeon/app/api/payment.ts`.
 
 ### EmailJS
-The project uses [`EmilJS](https://www.emailjs.com/) to manage email notifications to the user and internal team. More information about setting up the EmailJS account can be found [here](https://www.abstractapi.com/guides/email-validation/react-send-email-from-your-app-without-a-backend). 
+The project uses [`EmailJS`](https://www.emailjs.com/) to manage email notifications to the user and internal team. More information about setting up the EmailJS account can be found [here](https://www.abstractapi.com/guides/email-validation/react-send-email-from-your-app-without-a-backend). 
 
 - Alter the template IDs and emails in the function `handleConfirmPayment` in `paygeon/components/InvoiceUploader/InvoiceUploader.tsx`.
 
