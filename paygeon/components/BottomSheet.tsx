@@ -1,12 +1,12 @@
-// components/BottomSheet.tsx
-import { ReactNode, useEffect } from 'react';
+"use client"
+import React, { ReactNode, useEffect } from 'react';
 import { useSpring, animated } from '@react-spring/web';
 import { useDrag } from '@use-gesture/react';
 
 interface BottomSheetProps {
   isVisible: boolean;
   content: ReactNode;
-  onClose?: () => void; // Make onClose function optional
+  onClose?: () => void;
 }
 
 const BottomSheet: React.FC<BottomSheetProps> = ({ isVisible, content, onClose }) => {
@@ -18,7 +18,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({ isVisible, content, onClose }
 
   const closeSheet = () => {
     api.start({ y: 100, immediate: false });
-    onClose?.(); // Call onClose only if it's defined
+    onClose?.();
   };
 
   const bind = useDrag(({ down, movement: [, my], memo = y.get() }) => {
@@ -53,7 +53,7 @@ const BottomSheet: React.FC<BottomSheetProps> = ({ isVisible, content, onClose }
         style={{ transform: y.to(y => `translateY(${y}%)`) }}
         className="fixed inset-x-0 bottom-0 bg-white rounded-t-2xl shadow-lg p-6 z-50"
       >
-        <div className="relative w-full max-w-md mx-none">
+        <div className="relative w-full max-w-md mx-auto">
           {content}
         </div>
       </animated.div>
