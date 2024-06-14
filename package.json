@@ -12,7 +12,7 @@
     "@cred/neopop-web": "^1.0.0",
     "@emailjs/browser": "^4.3.3",
     "@moonpay/moonpay-js": "^0.5.0",
-    "@moonpay/moonpay-react": "^1.6.2",
+    "@moonpay/moonpay-react": "^1.7.0",
     "@react-spring/web": "^9.7.3",
     "@use-gesture/react": "^10.3.1",
     "buffer": "^6.0.3",
