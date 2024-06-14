@@ -212,7 +212,7 @@ export default function InvoiceUploader() {
     console.log(text);
 
     const customerData = text.match(/(?<=Bill\s?To:?\n|Customer:?\n|To:?\n).*(?:\n.*){2}/i);
-    const merchantData = text.match(/(?<=From:?\n|Merchant:?\n).*(?:\n.*){2}/i);    
+    const merchantData = text.match(/(?<=From:?\n|Merchant:?\n).*(?:\n.*){2}/i);
     const merchantBankData = text.match(/(?:Notes|Memo)\s*:\s*(.*)/i);
 
     let customer: string[] = [];
@@ -379,7 +379,7 @@ export default function InvoiceUploader() {
 
       setTimeout(() => {
         // Seding a confirmation email both to the internal team and the customer
-        if (status.value_coin == coinPaymentAmount){
+        if (status.value_coin == coinPaymentAmount) {
           sendEmail(internalTeamData, "template_ui2a7ls");
           sendEmail(customerData, "template_hocme3k");
           setPaymentStatus(2);

@@ -1,6 +1,8 @@
 "use client"
 import React, { useState } from 'react';
 import BottomSheet from './BottomSheet';
+import { MoonPayProvider, MoonPayBuyWidget } from '@moonpay/moonpay-react';
+import './styles.css';
 
 interface NavigationItemProps {
   src: string;
@@ -19,6 +21,7 @@ const NavigationItem: React.FC<NavigationItemProps> = ({ src, alt, label, href, 
 
 const BottomMenu: React.FC = () => {
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [moonPayVisible, setMoonPayVisible] = useState(false);
 
   const toggleBottomSheet = () => {
     setIsBottomSheetOpen(!isBottomSheetOpen);
@@ -40,7 +43,25 @@ const BottomMenu: React.FC = () => {
           <NavigationItem key={index} {...item} />
         ))}
       </nav>
-      <BottomSheet isVisible={isBottomSheetOpen} onClose={() => setIsBottomSheetOpen(false)} content={<div className="relative w-full max-w-md mx-auto"><p>This is the bottom sheet content.</p></div>} />
+      <BottomSheet isVisible={isBottomSheetOpen} onClose={() => {setIsBottomSheetOpen(false); setMoonPayVisible(false);}} content={
+        <div className="flex flex-col relative w-full max-w-md mx-auto items-center">
+          <h2 className="text-xl font-bold text-black">More</h2>
+          <hr className="header-line" />
+          <MoonPayProvider
+            apiKey="pk_test_NWjOGREvFvtTnJGEguH56nuNXcUK8J"
+            debug
+          >
+            <MoonPayBuyWidget
+              variant="overlay"
+              baseCurrencyCode="usd"
+              baseCurrencyAmount="100"
+              defaultCurrencyCode="eth"
+              visible={moonPayVisible}
+            />
+            <button className="text-black" onClick={() => setMoonPayVisible(true)}>Add Crypto</button>
+          </MoonPayProvider>
+
+        </div>} />
 
     </>
   );

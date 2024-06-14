@@ -1,0 +1,7 @@
+.header-line {
+    border: 0.25px solid black;
+    width: 20em;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+  }
