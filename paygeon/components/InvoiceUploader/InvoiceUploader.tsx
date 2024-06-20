@@ -8,6 +8,7 @@ import './styles.css';
 import CopyButton from './copyButton';
 import emailjs from "@emailjs/browser";
 import NeoPopTiltedButton from '../NeoPOPTiltedButton/NeoPOPTiltedButton';
+import pdfToText from 'react-pdftotext';
 
 const CameraLottie = dynamic(() => import('../animation/CameraLottie'), {
   ssr: false,
@@ -172,15 +173,17 @@ export default function InvoiceUploader() {
     if (!fileToProcess) return;
 
     try {
-      // Recognizing text from the image using Tesseract OCR
-      const result = await Tesseract.recognize(fileToProcess, 'eng', {
-        logger: (m) => console.log(m),
-      });
+      var result; 
+      // Extracting text from PDF / image
+      if (fileToProcess.type === 'application/pdf') {
+        result = await pdfToText(fileToProcess);
+      } else {
+        result = (await Tesseract.recognize(fileToProcess, 'eng')).data.text;
+      }
 
-      setOcrResult(result.data.text);
-      extractInvoiceInfo(result.data.text);
+      setOcrResult(result);
 
-      const extractedData = extractDataFromOcr(result.data.text);
+      const extractedData = extractDataFromOcr(result);
       if (!extractedData) {
         console.error('Failed to extract data from OCR');
         return;
@@ -207,16 +210,14 @@ export default function InvoiceUploader() {
     }
   };
 
-  // Extracting customer and merchant information from OCR result
-  const extractInvoiceInfo = (text: string) => {
-    console.log(text);
-
+  // Extracting customer information, merchant information, and invoice amount from OCR result
+  const extractDataFromOcr = (text: string): { amountDue: number } | null => {
     const customerData = text.match(/(?<=Bill\s?To:?\n|Customer:?\n|To:?\n).*(?:\n.*){2}/i);
     const merchantData = text.match(/(?<=From:?\n|Merchant:?\n).*(?:\n.*){2}/i);
     const merchantBankData = text.match(/(?:Notes|Memo)\s*:\s*(.*)/i);
 
-    let customer: string[] = [];
-    let merchant: string[] = [];
+    var customer: string[] = [];
+    var merchant: string[] = [];
 
     if (customerData) {
       customer = customerData[0].split('\n').map(line => line.trim());
@@ -253,10 +254,7 @@ export default function InvoiceUploader() {
       account: merchantBank
     };
     setMerchantInfo(merchantInfo);
-  };
 
-  // Extracting invoice amount from OCR result
-  const extractDataFromOcr = (text: string): { amountDue: number } | null => {
     const amountDueRegex = /(?:Amount|Amount Due|Balance|Balance Due|Total|Total Due)\s*:?\s*\$?([\d,]+(?:\.\d{2})?)/i;
     const amountDueMatch = text.match(amountDueRegex);
     if (!amountDueMatch) {
@@ -407,7 +405,7 @@ export default function InvoiceUploader() {
           Take a Photo
         </button>
         <br></br>
-        <input type="file" accept="image/*" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
+        <input type="file" accept="image/*, application/pdf" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
         <button onClick={handleChooseFile} className="custom-button custom-white-button">
           Choose File
         </button>
