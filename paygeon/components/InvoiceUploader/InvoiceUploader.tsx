@@ -248,15 +248,14 @@ export default function InvoiceUploader() {
     setCustomerInfo(customerInfo);
 
     const merchantInfo = {
-      name: merchantName,
+      name: merchantName ? merchantName : text.split(' ')[0],
       email: merchantEmail,
       address: merchantAddress,
       account: merchantBank
     };
     setMerchantInfo(merchantInfo);
 
-    const amountDueRegex = /(?:Amount|Amount Due|Balance|Balance Due|Total|Total Due)\s*:?\s*\$?([\d,]+(?:\.\d{2})?)/i;
-    const amountDueMatch = text.match(amountDueRegex);
+    const amountDueMatch = text.match(/(?<!\S)(?:Amount|Amount Due|New Balance|Balance Due|Total|Total Due)\s*:?\s*\$?([\d,]+(?:\.\d{2})?)/i);
     if (!amountDueMatch) {
       console.error('Failed to extract amount due from OCR');
       return null;
