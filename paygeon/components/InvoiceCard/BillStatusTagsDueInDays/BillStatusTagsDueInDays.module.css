@@ -1,0 +1,19 @@
+.root {
+  width: min-content;
+  height: min-content;
+  padding: 4px 10px;
+  background-color: #f08d32;
+}
+.dUEIn3Days {
+  color: #fff;
+  font-size: 10px;
+  line-height: 13px;
+  font-family: Paygeon, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans',
+    'Liberation Sans', sans-serif;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  width: min-content;
+  height: min-content;
+  white-space: nowrap;
+  flex-direction: column;
+}

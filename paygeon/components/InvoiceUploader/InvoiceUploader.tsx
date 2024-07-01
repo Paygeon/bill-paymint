@@ -1,24 +1,59 @@
-import React, { useState, useRef } from 'react';
+"use client";
+import React, { useState, useRef, forwardRef, ChangeEvent, useEffect } from 'react';
 import dynamic from 'next/dynamic';
 import Tesseract from 'tesseract.js';
 import { generateCryptoAddress, confirmPayment } from '../../app/api/payment';
-
-import './styles.css';
-
 import CopyButton from './copyButton';
 import emailjs from "@emailjs/browser";
 import NeoPopTiltedButton from '../NeoPOPTiltedButton/NeoPOPTiltedButton';
 import pdfToText from 'react-pdftotext';
+import { InvoiceDisplay } from '../InvoiceCard/InvoiceDisplay';
+import DatePicker from 'react-datepicker';
+import 'react-datepicker/dist/react-datepicker.css';
+import { FaCalendarAlt } from 'react-icons/fa';
+import { supabase } from './supabaseClient';
+import './styles.css';
+import { v4 as uuidv4 } from 'uuid';
 
 const CameraLottie = dynamic(() => import('../animation/CameraLottie'), {
   ssr: false,
 });
 
+interface DateInputProps {
+  value?: string;
+  onClick?: () => void;
+}
+
+const DateInput = forwardRef<HTMLInputElement, DateInputProps>(({ value, onClick }, ref) => (
+  <div className="relative w-full">
+    <input
+      type="text"
+      readOnly
+      value={value}
+      className="rounded border leading-tight w-full py-2 px-3 text-gray-700 focus:outline-none"
+      onClick={(e) => e.stopPropagation()}
+      placeholder="MM/dd/yyyy"
+    />
+    <FaCalendarAlt
+      onClick={onClick}
+      className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-gray-700"
+    />
+  </div>
+));
+
+interface FormData {
+  invoice_id: string;
+  invoice_amount: string;
+  invoice_date: Date | null;
+  due_date: Date | null;
+  merchant_name: string;
+}
+
 export default function InvoiceUploader() {
   // Defining state variables
   const [file, setFile] = useState<File | null>(null);
   const [ocrResult, setOcrResult] = useState<string | null>(null);
-  const [invoiceData, setInvoiceData] = useState<{ amountDue: number } | null>(null);
+  const [invoiceAmount, setInvoiceAmount] = useState<{ amountDue: number }>();
   const [paymentAmount, setPaymentAmount] = useState<any>(null);
   const [coin, setCoin] = useState('btc');
   const [dropdownCoin, setDropdownCoin] = useState('btc');
@@ -28,6 +63,16 @@ export default function InvoiceUploader() {
   const [merchantInfo, setMerchantInfo] = useState<{ name: string, email: string, address: string, account: string } | null>(null);
   const [paymentStatus, setPaymentStatus] = useState<number>(0);
   const [callbackUrl, setCallbackUrl] = useState<any>(null);
+  const [showForm, setShowForm] = useState(false);
+  const [formData, setFormData] = useState<FormData>({
+    invoice_id: uuidv4(),
+    invoice_amount: '',
+    invoice_date: null,
+    due_date: null,
+    merchant_name: '',
+  });
+  const [invoiceCardData, setInvoiceCardData] = useState<FormData[]>([]);
+  const [paymentInvoice, setPaymentInvoice] = useState<FormData>();
 
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -161,7 +206,7 @@ export default function InvoiceUploader() {
   // Resetting all the state variables to default
   const resetStateVariables = () => {
     setOcrResult(null);
-    setInvoiceData(null);
+    setInvoiceAmount({ amountDue: 0 });
     setPaymentAmount(null);
     setCoinPaymentAmount(null);
     setResponse(null);
@@ -172,46 +217,44 @@ export default function InvoiceUploader() {
     const fileToProcess = uploadedFile || file;
     if (!fileToProcess) return;
 
-    try {
-      var result; 
-      // Extracting text from PDF / image
-      if (fileToProcess.type === 'application/pdf') {
-        result = await pdfToText(fileToProcess);
-      } else {
-        result = (await Tesseract.recognize(fileToProcess, 'eng')).data.text;
-      }
 
-      setOcrResult(result);
-
-      const extractedData = extractDataFromOcr(result);
-      if (!extractedData) {
-        console.error('Failed to extract data from OCR');
-        return;
-      }
-
-      setInvoiceData(extractedData);
-
-      const amountWithFees = calculatePaymentAmount(extractedData.amountDue);
-      setPaymentAmount(amountWithFees.toFixed(2));
-
-      const coinAmount = await handlePayment(extractedData.amountDue, amountWithFees - extractedData.amountDue, coin);
-      const query = new URLSearchParams({
-        amount: `${coinAmount}`
-      }).toString();
-
-      const callbackUrl = `https://paygeon.com/api/payment?${query}`;
-      setCallbackUrl(callbackUrl);
-
-      const addressResponse = await generateCryptoAddress(coin, amountWithFees, callbackUrl);
-      setResponse(addressResponse);
-      console.log(addressResponse);
-    } catch (error) {
-      console.error('Error processing the image with Tesseract:', error);
+    var result;
+    // Extracting text from PDF / image
+    if (fileToProcess.type === 'application/pdf') {
+      result = await pdfToText(fileToProcess);
+    } else {
+      result = (await Tesseract.recognize(fileToProcess, 'eng')).data.text;
     }
-  };
+
+    setOcrResult(result);
+
+    const extractedData = extractDataFromOcr(result);
+    if (!extractedData) {
+      console.error('Failed to extract data from OCR');
+      return;
+    }
+
+    setInvoiceAmount(extractedData);
+    console.log(merchantInfo)
+    const uploadedData: FormData = {
+      invoice_id: uuidv4(),
+      invoice_amount: extractedData.amountDue.toString(),
+      invoice_date: new Date(),
+      due_date: new Date(),
+      merchant_name: extractedData.merchantName, 
+    };
+
+    const { data, error } = await supabase
+      .from('INVOICE_INFO')
+      .insert(uploadedData);
+
+    fetchInvoices();
+
+    handlePayment(uploadedData);
+  }
 
   // Extracting customer information, merchant information, and invoice amount from OCR result
-  const extractDataFromOcr = (text: string): { amountDue: number } | null => {
+  const extractDataFromOcr = (text: string): { amountDue: number, merchantName: string } | null => {
     const customerData = text.match(/(?<=Bill\s?To:?\n|Customer:?\n|To:?\n).*(?:\n.*){2}/i);
     const merchantData = text.match(/(?<=From:?\n|Merchant:?\n).*(?:\n.*){2}/i);
     const merchantBankData = text.match(/(?:Notes|Memo)\s*:\s*(.*)/i);
@@ -267,7 +310,25 @@ export default function InvoiceUploader() {
       console.error('Failed to parse amount due as number');
       return null;
     }
-    return { amountDue };
+    return { amountDue, merchantName: merchantInfo.name };
+  };
+
+  const handlePayment = async (data: FormData) => {
+    setPaymentInvoice(data);
+    const amountWithFees = calculatePaymentAmount(parseFloat(data.invoice_amount));
+    setPaymentAmount(amountWithFees.toFixed(2));
+
+    const coinAmount = await handleCryptoAmount(parseFloat(data.invoice_amount), parseFloat(data.invoice_amount), coin);
+    const query = new URLSearchParams({
+      amount: `${coinAmount}`
+    }).toString();
+
+    const callbackUrl = `https://paygeon.com/api/payment?${query}`;
+    setCallbackUrl(callbackUrl);
+
+    const addressResponse = await generateCryptoAddress(coin, amountWithFees, callbackUrl);
+    setResponse(addressResponse);
+    console.log(addressResponse);
   };
 
   // Calculating the total amount to be paid, including fees and charges
@@ -287,7 +348,7 @@ export default function InvoiceUploader() {
   };
 
   // Converting the total amount into selected crypto
-  const handlePayment = async (invoiceAmount: number, fees: number, cryptoSymbol: string) => {
+  const handleCryptoAmount = async (invoiceAmount: number, fees: number, cryptoSymbol: string) => {
     // Implement payment handling logic here
     const query = new URLSearchParams({
       value: `${invoiceAmount + fees}`,
@@ -313,8 +374,8 @@ export default function InvoiceUploader() {
   const handleCryptoChange = async (event: React.ChangeEvent<HTMLSelectElement>) => {
     const coinSymbol = event.target.value;
     setDropdownCoin(coinSymbol);
-    if (paymentAmount && invoiceData) {
-      const coinAmount = await handlePayment(invoiceData.amountDue, paymentAmount - invoiceData.amountDue, coinSymbol);
+    if (paymentAmount && invoiceAmount) {
+      const coinAmount = await handleCryptoAmount(invoiceAmount.amountDue, paymentAmount - invoiceAmount.amountDue, coinSymbol);
       const query = new URLSearchParams({
         amount: `${coinAmount}`
       }).toString();
@@ -394,20 +455,239 @@ export default function InvoiceUploader() {
     }
   };
 
+  const handleOpenForm = () => {
+    setShowForm(true);
+  };
+
+  const handleCloseForm = () => {
+    setShowForm(false);
+    setFormData({
+      invoice_id: uuidv4(),
+      invoice_amount: '',
+      invoice_date: null,
+      due_date: null,
+      merchant_name: '',
+    });
+  };
+
+  const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = event.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleInvoiceDateChange = (date: Date | null) => {
+    setFormData({ ...formData, invoice_date: date });
+  };
+
+  const handleDueDateChange = (date: Date | null) => {
+    setFormData({ ...formData, due_date: date });
+  };
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const { data, error } = await supabase
+      .from('INVOICE_INFO')
+      .insert(formData);
+
+    if (error) {
+      console.error('Error inserting data:', error);
+    } else {
+      console.log('Data inserted:', data);
+    }
+
+    setShowForm(false);
+    setFormData({
+      invoice_id: uuidv4(),
+      invoice_amount: '',
+      invoice_date: null,
+      due_date: null,
+      merchant_name: '',
+    });
+    fetchInvoices();
+    console.log(formData);
+  };
+
+  const fetchInvoices = async () => {
+    const { data, error } = await supabase
+      .from('INVOICE_INFO')
+      .select('*');
+
+    if (error) {
+      console.error('Error fetching data:', error);
+    } else {
+      handleInvoiceCardData(data as FormData[]);
+    }
+  };
+
+  const handleInvoiceCardData = (data: FormData[]) => {
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const modifiedData = data
+      .filter(sample => !sample.due_date || new Date(sample.due_date) >= today)
+      .map(sample => {
+        const newSample = { ...sample };
+        const dispId = sample.invoice_id.split('-').map(part => part[0]).join('').toUpperCase();
+        newSample.invoice_id = `INV-${dispId}`;
+        if (sample.due_date) {
+          newSample.due_date = new Date(sample.due_date);
+        } else {
+          newSample.due_date = null;
+        }
+        return newSample;
+      });
+
+    modifiedData.sort((a, b) => {
+      if (a.due_date && b.due_date) {
+        return a.due_date.getTime() - b.due_date.getTime();
+      } else if (a.due_date && !b.due_date) {
+        return -1;
+      } else if (!a.due_date && b.due_date) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+    setInvoiceCardData(modifiedData);
+  };
+
+  useEffect(() => {
+    fetchInvoices();
+    console.log(invoiceCardData);
+  }, [])
+
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2">
-      <div className="bg-transparent w-full h-[600px] flex justify-center items-center">
+    <div className="flex flex-col items-center justify-center min-h-screen py-2" style={{ width: '30em' }}>
+      <hr className="separating-line" style={{ marginTop: '0px' }} />
+      <h2 className="text-2xl font-bold mb-4">Your Invoices</h2>
+      <InvoiceDisplay invoiceCardData={invoiceCardData} paymentFunction={handlePayment} />
+      <hr className="separating-line" />
+      <div className="bg-transparent w-full h-[300px] flex justify-center items-center">
         <CameraLottie />
       </div>
       <div>
-        <button onClick={handleTakePhoto} className="custom-button custom-white-button">
+        <button onClick={handleOpenForm} className="custom-button custom-white-button" disabled={showForm}>
+          Add manually
+        </button>
+        <br></br>
+        <button onClick={handleTakePhoto} className="custom-button custom-white-button" disabled={showForm}>
           Take a Photo
         </button>
         <br></br>
         <input type="file" accept="image/*, application/pdf" ref={fileInputRef} style={{ display: 'none' }} onChange={handleFileChange} />
-        <button onClick={handleChooseFile} className="custom-button custom-white-button">
+        <button onClick={handleChooseFile} className="custom-button custom-white-button" disabled={showForm}>
           Choose File
         </button>
+
+        {showForm && (
+          <div className="fixed top-0 left-0 w-full h-full flex items-center justify-center bg-white bg-opacity-25">
+            <div className="bg-black p-4 rounded shadow-md w-1/4">
+              <h2 className="text-2xl font-bold mb-4 text-center">New Invoice</h2>
+              <hr className="separating-line" style={{ width: '100%', margin: '0px', marginBottom: '10px' }} />
+              <form onSubmit={handleSubmit}>
+                <div className="mb-4">
+                  <label htmlFor="merchant_name" className="block mb-2">
+                    Merchant Name <span style={{ color: 'red' }}>*</span>
+                  </label>
+                  <input
+                    type="text"
+                    id="merchant_name"
+                    name="merchant_name"
+                    value={formData.merchant_name}
+                    onChange={handleInputChange}
+                    className="rounded border leading-tight w-full py-2 px-3 text-gray-700 focus:outline-none"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="invoice_amount" className="block mb-2">
+                    Amount (in USD) <span style={{ color: 'red' }}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    id="invoice_amount"
+                    name="invoice_amount"
+                    value={formData.invoice_amount}
+                    onChange={handleInputChange}
+                    className="rounded border leading-tight w-full py-2 px-3 text-gray-700 focus:outline-none"
+                    required
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="invoice_date" className="block mb-2">
+                    Invoice Date
+                  </label>
+                  <DatePicker
+                    id="invoice_date"
+                    selected={formData.invoice_date}
+                    onChange={handleInvoiceDateChange}
+                    maxDate={new Date()}
+                    dateFormat="MM/dd/yyyy"
+                    customInput={<DateInput />}
+                    wrapperClassName="w-full"
+                  />
+                </div>
+                <div className="mb-4">
+                  <label htmlFor="due_date" className="block mb-2">
+                    Due Date
+                  </label>
+                  <DatePicker
+                    id="due_date"
+                    selected={formData.due_date}
+                    onChange={handleDueDateChange}
+                    minDate={new Date()}
+                    dateFormat="MM/dd/yyyy"
+                    customInput={<DateInput />}
+                    wrapperClassName="w-full"
+                  />
+                </div>
+                <div style={{ display: 'flex', width: '100%' }}>
+                  <button
+                    type="submit"
+                    style={{
+                      backgroundColor: '#4CAF50', 
+                      border: 'none',
+                      color: 'white',
+                      padding: '10px 20px',
+                      textAlign: 'center',
+                      textDecoration: 'none',
+                      display: 'inline-block',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      borderRadius: '4px',
+                      flex: 1, 
+                      marginRight: '10px' 
+                    }}
+                  >
+                    Save
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCloseForm}
+                    style={{
+                      backgroundColor: '#f44336',
+                      border: 'none',
+                      color: 'white',
+                      padding: '10px 20px',
+                      textAlign: 'center',
+                      textDecoration: 'none',
+                      display: 'inline-block',
+                      fontSize: '16px',
+                      cursor: 'pointer',
+                      borderRadius: '4px',
+                      flex: 1, 
+                      marginLeft: '10px' 
+                    }}
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        )}
+
+
         {file ? (
           <p className="display-text italic whitespace-nowrap overflow-hidden text-ellipsis pl-4">
             Selected file: {file.name ? file.name : "captured_photo"}
@@ -418,15 +698,15 @@ export default function InvoiceUploader() {
           </p>
         )}
       </div>
-      {merchantInfo && (
+      {paymentInvoice && (
         <hr className="separating-line" />
       )}
-      {merchantInfo && paymentAmount && invoiceData && invoiceData.amountDue && (
+      {paymentInvoice && (
         <div className="display-text">
           <h2 className="text-xl font-bold">Paying To:</h2>
-          <pre className="whitespace-pre-wrap">{merchantInfo.name}</pre>
+          <pre className="whitespace-pre-wrap">{paymentInvoice.merchant_name}</pre>
           <h2 className="text-xl font-bold">Invoice Amount:</h2>
-          <pre className="whitespace-pre-wrap">$ {invoiceData.amountDue.toFixed(2)}</pre>
+          <pre className="whitespace-pre-wrap">$ {parseFloat(paymentInvoice.invoice_amount).toFixed(2)}</pre>
           <h2 className="text-xl font-bold">Total Amount:</h2>
           <pre className="whitespace-pre-wrap">$ {paymentAmount}</pre>
         </div>

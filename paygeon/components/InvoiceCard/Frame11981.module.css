@@ -1,3 +1,33 @@
+.billCards.billCards {
+  left: 0;
+  top: 0;
+}
+.icon {
+  width: 100%;
+  height: 100%;
+}
+.rectangle2563.rectangle2563 {
+  background-image:/* webpackIgnore: true */ url('../assets/rectangle2563.png');
+}
+.billCards2.billCards2 {
+  left: 0;
+  top: 0;
+}
+.icon2 {
+  width: 100%;
+  height: 100%;
+}
+.rectangle25632.rectangle25632 {
+  background-image:/* webpackIgnore: true */ url('../assets/rectangle2563.png');
+}
+.root {
+  position: relative;
+  width: 225px; 
+  height: 298px; 
+  flex-direction: column;
+  align-items: flex-start;
+}
+
 .custom-button {
   width: 20em;
   position: relative;
@@ -52,48 +82,4 @@
 
 .custom-white-button:hover {
   box-shadow: inset 0 0 15px white!important;
-}
-
-.text-box {
-  font-style: italic;
-  height: 1.5em;
-  width: 20em;
-  margin: 5px;
-  margin-left: 10px;
-  border-radius: 0.3em;
-  padding: 5px;
-  position: relative;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.separating-line {
-  border: 0.25px solid white;
-  width: 70%;
-  margin: 10px;
-  opacity: 0.5;
-}
-
-.display-text {
-  width: 19em;
-  max-width: 100%;
-  overflow-wrap: break-word;
-}
-
-.dropdown-options {
-  width: 100%;
-  color: black;
-  padding: 5px;
-  margin-top: 10px;
-  margin-bottom: 10px;
-  border-radius: 0.3em;
-}
-
-.payment-button {
-  border: 3px ridge lawngreen;
-}
-
-.payment-button:not(:disabled):hover {
-  box-shadow: inset 0 0 25px lawngreen;
 }
