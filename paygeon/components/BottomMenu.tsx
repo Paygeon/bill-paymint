@@ -1,5 +1,5 @@
-"use client"
-import React, { useState } from 'react';
+"use client";
+import React, { useState, useEffect } from 'react';
 import BottomSheet from './BottomSheet';
 import { MoonPayProvider, MoonPayBuyWidget } from '@moonpay/moonpay-react';
 import './styles.css';
@@ -36,14 +36,18 @@ const BottomMenu: React.FC = () => {
     { src: "https://cdn.builder.io/api/v1/image/assets/TEMP/83217c72cabc5ccb6132806cefcd2c18a93479ebb67c9e6e611c9235058f66dd?apiKey=aa19eef6d1f1473ba394866de3aadd86&", alt: "More icon", label: "More", onClick: toggleBottomSheet },
   ];
 
+  useEffect(() => {
+    // Any client-side only logic can go here
+  }, []);
+
   return (
     <>
-      <nav className="flex gap-0 justify-center mx-none text-xs font-medium tracking-wide leading-4 whitespace-nowrap border-solid bg-stone-950 border-[0.5px] border-black border-opacity-0 fixed bottom-0 w-full">
+      <nav className="flex gap-0 justify-center mx-none text-xs text-white font-medium tracking-wide leading-4 whitespace-nowrap border-solid bg-stone-950 border-[0.5px] border-black z-20	 border-opacity-0 fixed bottom-0 w-full">
         {navItems.map((item, index) => (
           <NavigationItem key={index} {...item} />
         ))}
       </nav>
-      <BottomSheet isVisible={isBottomSheetOpen} onClose={() => {setIsBottomSheetOpen(false); setMoonPayVisible(false);}} content={
+      <BottomSheet isVisible={isBottomSheetOpen} onClose={() => { setIsBottomSheetOpen(false); setMoonPayVisible(false); }} content={
         <div className="flex flex-col relative w-full max-w-md mx-auto items-center">
           <h2 className="text-xl font-bold text-black">More</h2>
           <hr className="header-line" />
@@ -60,9 +64,7 @@ const BottomMenu: React.FC = () => {
             />
             <button className="text-black" onClick={() => setMoonPayVisible(true)}>Add Crypto</button>
           </MoonPayProvider>
-
         </div>} />
-
     </>
   );
 };

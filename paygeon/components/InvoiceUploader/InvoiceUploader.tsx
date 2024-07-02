@@ -30,117 +30,120 @@ export default function InvoiceUploader() {
   const [callbackUrl, setCallbackUrl] = useState<any>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-
+  
   // Handling photo capture of the invoice using camera
   const handleTakePhoto = () => {
-    const screenWidth = window.screen.width;
-    const screenHeight = window.screen.height;
-
-    const newWindow = window.open(
-      '',
-      'CameraWindow',
-      `width=${screenWidth},height=${screenHeight},left=0,top=0`
-    );
-
-    // Defining and styling the video stream and the button to capture photos
-    if (newWindow) {
-      newWindow.document.write(`
-      <html>
-        <head>
-          <style>
-            body {
-              display: flex;
-              flex-direction: column;
-              align-items: center;
-              justify-content: center;
-              margin: 0;
-              height: 100%;
-              background-color: #f0f0f0;
-            }
-            #camera-root {
-              display: flex; 
-              flex-direction: column; 
-              align-items: center; 
-              justify-content: center;
-              height: 97%;
-            }
-            #video {
-              height: 100%;
-            }
-            #capture-button {
-              margin-top: 10px;
-              padding: 10px 20px;
-              font-size: 16px;
-              background-color: #4CAF50;
-              color: white;
-              border: none;
-              cursor: pointer;
-              border-radius: 5px;
-              align-self: center;
-            }
-            #capture-button:hover {
-              background-color: #45a049;
-            }
-          </style>
-        </head>
-        <body>
-          <div id="camera-root">
-            <video id="video" autoplay></video>
-            <button id="capture-button">Capture Photo</button>
-            <canvas id="canvas" style="display:none;"></canvas>
-          </div>
-        </body>
-      </html>
-    `);
-      newWindow.document.close();
-
-      // Handling message from new window
-      const handleMessage = (event: MessageEvent) => {
-        if (event.origin !== window.location.origin) return;
-        if (event.data.type === 'CAPTURED_PHOTO') {
-          const photo = event.data.photo;
-          // Setting captured photo as the invoice file to be further processed
-          setFile(photo);
-          resetStateVariables();
-          handleUpload(photo);
-          window.removeEventListener('message', handleMessage);
-          newWindow.close();
-        }
-      };
-
-      window.addEventListener('message', handleMessage);
-
-      // Script for the new window to capture photo using the camera
-      const cameraScript = `
-      (function() {
-        const video = document.getElementById('video');
-        const canvas = document.getElementById('canvas');
-        const captureButton = document.getElementById('capture-button');
-
-        navigator.mediaDevices.getUserMedia({ video: true })
-          .then((stream) => {
-            video.srcObject = stream;
-          })
-          .catch((error) => {
-            console.error('Error accessing the camera: ', error);
-          });
-
-        captureButton.onclick = () => {
-          const context = canvas.getContext('2d');
-          canvas.width = video.videoWidth;
-          canvas.height = video.videoHeight;
-          context.drawImage(video, 0, 0, canvas.width, canvas.height);
-          const dataUrl = canvas.toDataURL('image/png');
-          window.opener.postMessage({ type: 'CAPTURED_PHOTO', photo: dataUrl }, window.location.origin);
+    if (typeof window !== 'undefined') {
+      const screenWidth = window.screen.width;
+      const screenHeight = window.screen.height;
+  
+      const newWindow = window.open(
+        '',
+        'CameraWindow',
+        `width=${screenWidth},height=${screenHeight},left=0,top=0`
+      );
+  
+      // Defining and styling the video stream and the button to capture photos
+      if (newWindow) {
+        newWindow.document.write(`
+          <html>
+            <head>
+              <style>
+                body {
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  margin: 0;
+                  height: 100%;
+                  background-color: #f0f0f0;
+                }
+                #camera-root {
+                  display: flex; 
+                  flex-direction: column; 
+                  align-items: center; 
+                  justify-content: center;
+                  height: 97%;
+                }
+                #video {
+                  height: 100%;
+                }
+                #capture-button {
+                  margin-top: 10px;
+                  padding: 10px 20px;
+                  font-size: 16px;
+                  background-color: #4CAF50;
+                  color: white;
+                  border: none;
+                  cursor: pointer;
+                  border-radius: 5px;
+                  align-self: center;
+                }
+                #capture-button:hover {
+                  background-color: #45a049;
+                }
+              </style>
+            </head>
+            <body>
+              <div id="camera-root">
+                <video id="video" autoplay></video>
+                <button id="capture-button">Capture Photo</button>
+                <canvas id="canvas" style="display:none;"></canvas>
+              </div>
+            </body>
+          </html>
+        `);
+        newWindow.document.close();
+  
+        // Handling message from new window
+        const handleMessage = (event: MessageEvent) => {
+          if (event.origin !== window.location.origin) return;
+          if (event.data.type === 'CAPTURED_PHOTO') {
+            const photo = event.data.photo;
+            // Setting captured photo as the invoice file to be further processed
+            setFile(photo);
+            resetStateVariables();
+            handleUpload(photo);
+            window.removeEventListener('message', handleMessage);
+            newWindow.close();
+          }
         };
-      })();
-    `;
-
-      const scriptElement = newWindow.document.createElement('script');
-      scriptElement.innerHTML = cameraScript;
-      newWindow.document.body.appendChild(scriptElement);
+  
+        window.addEventListener('message', handleMessage);
+  
+        // Script for the new window to capture photo using the camera
+        const cameraScript = `
+          (function() {
+            const video = document.getElementById('video');
+            const canvas = document.getElementById('canvas');
+            const captureButton = document.getElementById('capture-button');
+  
+            navigator.mediaDevices.getUserMedia({ video: true })
+              .then((stream) => {
+                video.srcObject = stream;
+              })
+              .catch((error) => {
+                console.error('Error accessing the camera: ', error);
+              });
+  
+            captureButton.onclick = () => {
+              const context = canvas.getContext('2d');
+              canvas.width = video.videoWidth;
+              canvas.height = video.videoHeight;
+              context.drawImage(video, 0, 0, canvas.width, canvas.height);
+              const dataUrl = canvas.toDataURL('image/png');
+              window.opener.postMessage({ type: 'CAPTURED_PHOTO', photo: dataUrl }, window.location.origin);
+            };
+          })();
+        `;
+  
+        const scriptElement = newWindow.document.createElement('script');
+        scriptElement.innerHTML = cameraScript;
+        newWindow.document.body.appendChild(scriptElement);
+      }
     }
   };
+  
 
   // Handling choosing a file from file input
   const handleChooseFile = () => {
@@ -399,7 +402,7 @@ export default function InvoiceUploader() {
       <div className="bg-transparent w-full h-[600px] flex justify-center items-center">
         <CameraLottie />
       </div>
-      <div>
+      <div className='mt-[-100px] mb-10'>
         <button onClick={handleTakePhoto} className="custom-button custom-white-button">
           Take a Photo
         </button>

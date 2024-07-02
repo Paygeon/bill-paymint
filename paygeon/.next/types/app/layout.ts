@@ -1,4 +1,4 @@
-// File: /workspace/bill-paymint/paygeon/app/layout.tsx
+// File: D:\coding\fiverr bug\bill-paymint\paygeon\app\layout.tsx
 import * as entry from '../../../app/layout.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 

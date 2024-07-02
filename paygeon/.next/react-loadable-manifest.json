@@ -1,9 +1,18 @@
 {
-  "components/InvoiceUploader/InvoiceUploader.tsx -> ../animation/CameraLottie": {
-    "id": "components/InvoiceUploader/InvoiceUploader.tsx -> ../animation/CameraLottie",
+  "app\\layout.tsx -> @/components/BottomMenu": {
+    "id": 3253,
     "files": [
-      "static/css/_app-pages-browser_components_animation_CameraLottie_tsx.css",
-      "static/chunks/_app-pages-browser_components_animation_CameraLottie_tsx.js"
+      "static/css/ea85f6c88a8353f3.css",
+      "static/chunks/338-93bd7053b885d1e6.js",
+      "static/chunks/253.b87edf44ac5bb4aa.js"
+    ]
+  },
+  "components\\InvoiceUploader\\InvoiceUploader.tsx -> ../animation/CameraLottie": {
+    "id": 5822,
+    "files": [
+      "static/css/735df47c128239df.css",
+      "static/chunks/c07e5374.73fbbbc62a91b435.js",
+      "static/chunks/822.34e6e5a3b2b0cc7e.js"
     ]
   }
 }
