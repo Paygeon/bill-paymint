@@ -1,10 +1,8 @@
 {
-  "app\\layout.tsx -> @/components/BottomMenu": {
-    "id": 3253,
+  "components\\BottomMenu.tsx -> @moonpay/moonpay-react": {
+    "id": 8380,
     "files": [
-      "static/css/ea85f6c88a8353f3.css",
-      "static/chunks/338-93bd7053b885d1e6.js",
-      "static/chunks/253.b87edf44ac5bb4aa.js"
+      "static/chunks/380.443889b7166a04f7.js"
     ]
   },
   "components\\InvoiceUploader\\InvoiceUploader.tsx -> ../animation/CameraLottie": {
