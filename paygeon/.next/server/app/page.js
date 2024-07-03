@@ -34,7 +34,7 @@ module.exports = require("next/dist/client/components/action-async-storage.exter
 
 /***/ }),
 
-/***/ "../../../client/components/request-async-storage.external":
+/***/ "./request-async-storage.external":
 /*!*****************************************************************************!*\
   !*** external "next/dist/client/components/request-async-storage.external" ***!
   \*****************************************************************************/
