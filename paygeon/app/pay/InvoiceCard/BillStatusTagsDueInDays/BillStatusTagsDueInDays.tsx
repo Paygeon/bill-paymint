@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import type { FC, ReactNode } from 'react';
 
-import resets from '../../_resets.module.css';
+import resets from '../_resets.module.css';
 import classes from './BillStatusTagsDueInDays.module.css';
 
 interface Props {

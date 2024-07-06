@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import InvoiceUploader from '@/components/InvoiceUploader/InvoiceUploader';
 import RootLayout from './layout'
 
-const App: React.FC = () => {
+const Home: React.FC = () => {
   const widgetRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -32,4 +32,4 @@ const App: React.FC = () => {
     </RootLayout>
   );
 };
-export default App;
+export default Home;

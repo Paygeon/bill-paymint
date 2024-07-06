@@ -7,7 +7,6 @@ import CopyButton from './copyButton';
 import emailjs from "@emailjs/browser";
 import NeoPopTiltedButton from '../NeoPOPTiltedButton/NeoPOPTiltedButton';
 import pdfToText from 'react-pdftotext';
-import { InvoiceDisplay } from '../InvoiceCard/InvoiceDisplay';
 import DatePicker from 'react-datepicker';
 import 'react-datepicker/dist/react-datepicker.css';
 import { FaCalendarAlt } from 'react-icons/fa';
@@ -73,8 +72,12 @@ export default function InvoiceUploader() {
   });
   const [invoiceCardData, setInvoiceCardData] = useState<FormData[]>([]);
   const [paymentInvoice, setPaymentInvoice] = useState<FormData>();
-
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const query = new URLSearchParams(window.location.search);
+    handlePayRedirect(query.get('invoice_id'));
+  }, [])
 
   // Handling photo capture of the invoice using camera
   const handleTakePhoto = () => {
@@ -248,8 +251,6 @@ export default function InvoiceUploader() {
       .from('INVOICE_INFO')
       .insert(uploadedData);
 
-    fetchInvoices();
-
     handlePayment(uploadedData);
   }
 
@@ -313,6 +314,19 @@ export default function InvoiceUploader() {
     return { amountDue, merchantName: merchantInfo.name };
   };
 
+  const handlePayRedirect = async (invoice_id : string | null) => {
+    console.log(invoice_id);
+    const { data, error } = await supabase
+      .from('INVOICE_INFO')
+      .select('*') 
+      .eq('invoice_id', invoice_id);
+    if (data) {
+      handlePayment(data[0] as FormData);
+    } else {
+      console.log('Couldn\'t find the recoed with given Invoice ID');
+    }
+  }
+
   const handlePayment = async (data: FormData) => {
     setPaymentInvoice(data);
     const amountWithFees = calculatePaymentAmount(parseFloat(data.invoice_amount));
@@ -329,6 +343,13 @@ export default function InvoiceUploader() {
     const addressResponse = await generateCryptoAddress(coin, amountWithFees, callbackUrl);
     setResponse(addressResponse);
     console.log(addressResponse);
+
+    setTimeout(() => {
+      const targetDiv = document.getElementById('payment-div');
+      if (targetDiv) {
+        targetDiv.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 50);
   };
 
   // Calculating the total amount to be paid, including fees and charges
@@ -503,65 +524,12 @@ export default function InvoiceUploader() {
       due_date: null,
       merchant_name: '',
     });
-    fetchInvoices();
     console.log(formData);
   };
 
-  const fetchInvoices = async () => {
-    const { data, error } = await supabase
-      .from('INVOICE_INFO')
-      .select('*');
-
-    if (error) {
-      console.error('Error fetching data:', error);
-    } else {
-      handleInvoiceCardData(data as FormData[]);
-    }
-  };
-
-  const handleInvoiceCardData = (data: FormData[]) => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    const modifiedData = data
-      .filter(sample => !sample.due_date || new Date(sample.due_date) >= today)
-      .map(sample => {
-        const newSample = { ...sample };
-        const dispId = sample.invoice_id.split('-').map(part => part[0]).join('').toUpperCase();
-        newSample.invoice_id = `INV-${dispId}`;
-        if (sample.due_date) {
-          newSample.due_date = new Date(sample.due_date);
-        } else {
-          newSample.due_date = null;
-        }
-        return newSample;
-      });
-
-    modifiedData.sort((a, b) => {
-      if (a.due_date && b.due_date) {
-        return a.due_date.getTime() - b.due_date.getTime();
-      } else if (a.due_date && !b.due_date) {
-        return -1;
-      } else if (!a.due_date && b.due_date) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
-    setInvoiceCardData(modifiedData);
-  };
-
-  useEffect(() => {
-    fetchInvoices();
-    console.log(invoiceCardData);
-  }, [])
-
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen py-2" style={{ width: '30em' }}>
-      <hr className="separating-line" style={{ marginTop: '0px' }} />
-      <h2 className="text-2xl font-bold mb-4">Your Invoices</h2>
-      <InvoiceDisplay invoiceCardData={invoiceCardData} paymentFunction={handlePayment} />
-      <hr className="separating-line" />
-      <div className="bg-transparent w-full h-[300px] flex justify-center items-center">
+    <div className="flex flex-col items-center min-h-screen py-2" style={{ width: '30em' }}>
+      <div className="bg-transparent w-full h-[500px] flex justify-center items-center">
         <CameraLottie />
       </div>
       <div>
@@ -765,6 +733,7 @@ export default function InvoiceUploader() {
             </svg> : paymentStatus == 2 ? "Success" : "Failed. Please Try Again."}
         </NeoPopTiltedButton>
       )}
+      <div id='payment-div'></div>
     </div>
   );
 }

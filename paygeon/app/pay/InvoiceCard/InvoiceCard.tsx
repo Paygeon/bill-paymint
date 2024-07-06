@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import type { FC } from 'react';
 
-import resets from '../_resets.module.css';
+import resets from './_resets.module.css';
 import { BillCards_CardTataAIA } from './BillCards_CardTataAIA/BillCards_CardTataAIA';
 import classes from './Frame11981.module.css';
 import { PatternHolderIcon } from './PatternHolderIcon';

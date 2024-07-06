@@ -7,7 +7,7 @@
   height: 100%;
 }
 .rectangle2563.rectangle2563 {
-  background-image:/* webpackIgnore: true */ url('../assets/rectangle2563.png');
+  background-image:/* webpackIgnore: true */ url('./assets/rectangle2563.png');
 }
 .billCards2.billCards2 {
   left: 0;
@@ -18,7 +18,7 @@
   height: 100%;
 }
 .rectangle25632.rectangle25632 {
-  background-image:/* webpackIgnore: true */ url('../assets/rectangle2563.png');
+  background-image:/* webpackIgnore: true */ url('./assets/rectangle2563.png');
 }
 .root {
   position: relative;

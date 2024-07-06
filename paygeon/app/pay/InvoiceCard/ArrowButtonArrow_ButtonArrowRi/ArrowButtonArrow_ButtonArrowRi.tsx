@@ -1,7 +1,7 @@
 import { memo } from 'react';
 import type { FC } from 'react';
 
-import resets from '../../_resets.module.css';
+import resets from '../_resets.module.css';
 import classes from './ArrowButtonArrow_ButtonArrowRi.module.css';
 import { VectorIcon } from './VectorIcon';
 
