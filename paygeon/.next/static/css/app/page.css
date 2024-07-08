@@ -766,17 +766,8 @@ video {
 .bottom-0 {
   bottom: 0px;
 }
-.bottom-12 {
-  bottom: 3rem;
-}
-.right-4 {
-  right: 1rem;
-}
-.left-0 {
-  left: 0px;
-}
-.right-0 {
-  right: 0px;
+.z-20 {
+  z-index: 20;
 }
 .z-40 {
   z-index: 40;
@@ -784,13 +775,16 @@ video {
 .z-50 {
   z-index: 50;
 }
+.mx-auto {
+  margin-left: auto;
+  margin-right: auto;
+}
 .my-auto {
   margin-top: auto;
   margin-bottom: auto;
 }
-.mx-auto {
-  margin-left: auto;
-  margin-right: auto;
+.mb-10 {
+  margin-bottom: 2.5rem;
 }
 .mb-4 {
   margin-bottom: 1rem;
@@ -803,6 +797,9 @@ video {
 }
 .mt-4 {
   margin-top: 1rem;
+}
+.mt-\[-100px\] {
+  margin-top: -100px;
 }
 .flex {
   display: flex;
@@ -836,9 +833,6 @@ video {
 }
 .w-full {
   width: 100%;
-}
-.w-\[50px\] {
-  width: 50px;
 }
 .max-w-\[347px\] {
   max-width: 347px;
@@ -907,10 +901,6 @@ video {
   border-top-left-radius: 1rem;
   border-top-right-radius: 1rem;
 }
-.rounded-t-xl {
-  border-top-left-radius: 0.75rem;
-  border-top-right-radius: 0.75rem;
-}
 .border {
   border-width: 1px;
 }
@@ -957,17 +947,11 @@ video {
 .bg-opacity-50 {
   --tw-bg-opacity: 0.5;
 }
-.bg-opacity-40 {
-  --tw-bg-opacity: 0.4;
-}
 .p-5 {
   padding: 1.25rem;
 }
 .p-6 {
   padding: 1.5rem;
-}
-.p-4 {
-  padding: 1rem;
 }
 .px-4 {
   padding-left: 1rem;
@@ -995,10 +979,6 @@ video {
 .text-3xl {
   font-size: 1.875rem;
   line-height: 2.25rem;
-}
-.text-4xl {
-  font-size: 2.25rem;
-  line-height: 2.5rem;
 }
 .text-base {
   font-size: 1rem;
@@ -1089,3 +1069,13 @@ body {
     rgb(var(--background-start-rgb));
 }
 
+/*!*********************************************************************************************************************************************************************************************************************************************************************!*\
+  !*** css ../node_modules/next/dist/build/webpack/loaders/css-loader/src/index.js??ruleSet[1].rules[13].oneOf[12].use[2]!../node_modules/next/dist/build/webpack/loaders/postcss-loader/src/index.js??ruleSet[1].rules[13].oneOf[12].use[3]!./components/styles.css ***!
+  \*********************************************************************************************************************************************************************************************************************************************************************/
+.header-line {
+    border: 0.25px solid black;
+    width: 20em;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    opacity: 0.5;
+  }

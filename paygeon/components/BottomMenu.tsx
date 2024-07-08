@@ -1,15 +1,25 @@
-"use client"
+"use client";
 import React, { useState } from 'react';
+import dynamic from 'next/dynamic';
 import BottomSheet from './BottomSheet';
-import { MoonPayProvider, MoonPayBuyWidget } from '@moonpay/moonpay-react';
 import './styles.css';
+
+const MoonPayProvider = dynamic(
+  () => import('@moonpay/moonpay-react').then(mod => mod.MoonPayProvider),
+  { ssr: false }
+);
+
+const MoonPayBuyWidget = dynamic(
+  () => import('@moonpay/moonpay-react').then(mod => mod.MoonPayBuyWidget),
+  { ssr: false }
+);
 
 interface NavigationItemProps {
   src: string;
   alt: string;
   label: string;
-  href?: string; // Make href optional
-  onClick?: () => void; // Add onClick prop
+  href?: string;
+  onClick?: () => void;
 }
 
 const NavigationItem: React.FC<NavigationItemProps> = ({ src, alt, label, href, onClick }) => (
@@ -38,31 +48,28 @@ const BottomMenu: React.FC = () => {
 
   return (
     <>
-      <nav className="flex gap-0 justify-center mx-none text-xs font-medium tracking-wide leading-4 whitespace-nowrap border-solid bg-stone-950 border-[0.5px] border-black border-opacity-0 fixed bottom-0 w-full">
+      <nav className="flex gap-0 justify-center mx-none text-xs text-white font-medium tracking-wide leading-4 whitespace-nowrap border-solid bg-stone-950 border-[0.5px] border-black z-20 border-opacity-0 fixed bottom-0 w-full">
         {navItems.map((item, index) => (
           <NavigationItem key={index} {...item} />
         ))}
       </nav>
-      <BottomSheet isVisible={isBottomSheetOpen} onClose={() => {setIsBottomSheetOpen(false); setMoonPayVisible(false);}} content={
+      <BottomSheet isVisible={isBottomSheetOpen} onClose={() => { setIsBottomSheetOpen(false); setMoonPayVisible(false); }} content={
         <div className="flex flex-col relative w-full max-w-md mx-auto items-center">
           <h2 className="text-xl font-bold text-black">More</h2>
           <hr className="header-line" />
-          <MoonPayProvider
-            apiKey="pk_test_NWjOGREvFvtTnJGEguH56nuNXcUK8J"
-            debug
-          >
-            <MoonPayBuyWidget
-              variant="overlay"
-              baseCurrencyCode="usd"
-              baseCurrencyAmount="100"
-              defaultCurrencyCode="eth"
-              visible={moonPayVisible}
-            />
-            <button className="text-black" onClick={() => setMoonPayVisible(true)}>Add Crypto</button>
-          </MoonPayProvider>
-
+          {typeof window !== 'undefined' && (
+            <MoonPayProvider apiKey="pk_test_NWjOGREvFvtTnJGEguH56nuNXcUK8J" debug>
+              <MoonPayBuyWidget
+                variant="overlay"
+                baseCurrencyCode="usd"
+                baseCurrencyAmount="100"
+                defaultCurrencyCode="eth"
+                visible={moonPayVisible}
+              />
+              <button className="text-black" onClick={() => setMoonPayVisible(true)}>Add Crypto</button>
+            </MoonPayProvider>
+          )}
         </div>} />
-
     </>
   );
 };
