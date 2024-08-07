@@ -31,14 +31,14 @@
 .custom-button {
   width: 20em;
   position: relative;
-  height: 3.5em;
-  border: 3px ridge dodgerblue;
+  height: 2.5em;
+  border: 1px ridge white;
   outline: none;
   background-color: transparent;
   color: white;
   transition: background-color 1s, box-shadow 1s;
   border-radius: 0.3em;
-  font-weight: bold;
+  font-weight: normal;
   cursor: pointer;
   margin: 10px;
 }
@@ -70,16 +70,5 @@
 
 
 .custom-button:not(:disabled):hover {
-  box-shadow: inset 0 0 25px dodgerblue;
-}
-
-.custom-white-button {
-  border: 1px ridge white;
-  font-weight: normal;
-  height: 2.5em;
-  width: 20em;
-}
-
-.custom-white-button:hover {
-  box-shadow: inset 0 0 15px white!important;
+  box-shadow: inset 0 0 15px white;
 }

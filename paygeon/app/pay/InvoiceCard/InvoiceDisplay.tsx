@@ -32,7 +32,7 @@ export const InvoiceDisplay: React.FC<InvoiceDisplayProps> = ({ invoiceCardData,
                 </div>
             ))}
             <div className="flex justify-center w-full">
-                <button className='custom-button custom-white-button' onClick={toggleShowAll} disabled={invoiceCardData.length < initialDisplayCount}>
+                <button className='custom-button' onClick={toggleShowAll} disabled={invoiceCardData.length < initialDisplayCount}>
                     {showAll ? 'Show Less' : 'Show All'}
                 </button>
             </div>

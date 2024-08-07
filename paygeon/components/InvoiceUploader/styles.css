@@ -1,14 +1,14 @@
 .custom-button {
-  width: 20em;
+  width: 25em;
   position: relative;
-  height: 3.5em;
-  border: 3px ridge dodgerblue;
+  height: 2.5em;
+  border: 1px ridge white;
   outline: none;
   background-color: transparent;
   color: white;
   transition: background-color 1s, box-shadow 1s;
   border-radius: 0.3em;
-  font-weight: bold;
+  font-weight: normal;
   cursor: pointer;
   margin: 10px;
 }
@@ -40,18 +40,7 @@
 
 
 .custom-button:not(:disabled):hover {
-  box-shadow: inset 0 0 25px dodgerblue;
-}
-
-.custom-white-button {
-  border: 1px ridge white;
-  font-weight: normal;
-  height: 2.5em;
-  width: 20em;
-}
-
-.custom-white-button:hover {
-  box-shadow: inset 0 0 15px white!important;
+  box-shadow: inset 0 0 15px white;
 }
 
 .text-box {
@@ -70,13 +59,14 @@
 
 .separating-line {
   border: 0.25px solid white;
-  width: 70%;
-  margin: 10px;
+  width: 100%;
+  margin-top: 10px;
+  margin-bottom: 10px;
   opacity: 0.5;
 }
 
 .display-text {
-  width: 19em;
+  width: 25em;
   max-width: 100%;
   overflow-wrap: break-word;
 }
@@ -90,10 +80,33 @@
   border-radius: 0.3em;
 }
 
-.payment-button {
-  border: 3px ridge lawngreen;
+.form-button {
+  border: none;
+  color: white;
+  padding: 10px 20px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  border-radius: 4px;
+  flex: 1;
 }
 
-.payment-button:not(:disabled):hover {
-  box-shadow: inset 0 0 25px lawngreen;
+.save-button {
+  background-color: #4caf50;
+  margin-right: 10px;
+}
+
+.cancel-button {
+  background-color: #f44336;
+  margin-left: 10px;
+}
+
+.z-index-1000 {
+  z-index: 1000;
+}
+
+.z-index-1001 {
+  z-index: 1001;
 }
