@@ -30,7 +30,7 @@
     "tesseract.js": "^5.1.0",
     "uuid": "^10.0.0",
     "viem": "^2.15.1",
-    "webpack": "^5.91.0"
+    "webpack": "^5.94.0"
   },
   "devDependencies": {
     "@types/node": "^20",
